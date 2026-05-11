@@ -341,7 +341,21 @@ hr { border-color: #e0ddd5; }
 
 # ── Page routing via query params ───────────────────────────────────────────────
 _VALID_PAGES = {"process", "output", "judicial", "districts", "inputs"}
-query_params = st.experimental_get_query_params()
+
+def _get_query_params() -> dict:
+    if hasattr(st, "experimental_get_query_params"):
+        return st.experimental_get_query_params()
+    return getattr(st, "query_params", {})
+
+
+def _set_query_params(params: dict) -> None:
+    if hasattr(st, "experimental_set_query_params"):
+        st.experimental_set_query_params(**params)
+    elif hasattr(st, "set_query_params"):
+        st.set_query_params(**params)
+
+
+query_params = _get_query_params()
 page = query_params.get("page", ["process"])
 if isinstance(page, list):
     page = page[0] if page else "process"
@@ -350,7 +364,7 @@ if page not in _VALID_PAGES:
 
 current_query_page = query_params.get("page")
 if current_query_page != [page]:
-    st.experimental_set_query_params(page=page)
+    _set_query_params({"page": page})
 
 
 def _nav_link(label: str, key: str) -> str:
