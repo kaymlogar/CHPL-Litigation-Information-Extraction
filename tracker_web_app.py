@@ -233,7 +233,7 @@ html, body,
     border-radius: 4px !important;
     background: #fffdf6 !important;
 }
-            [data-testid="stFileUploaderDropzone"]:hover,
+[data-testid="stFileUploaderDropzone"]:hover,
 [data-testid="stFileUploaderDropzone"]:focus-within {
     border-color: #16c5f9 !important;
 }
@@ -341,31 +341,9 @@ hr { border-color: #e0ddd5; }
 
 # ── Page routing via query params ───────────────────────────────────────────────
 _VALID_PAGES = {"process", "output", "judicial", "districts", "inputs"}
-
-def _get_query_params() -> dict:
-    if hasattr(st, "experimental_get_query_params"):
-        return st.experimental_get_query_params()
-    return getattr(st, "query_params", {})
-
-
-def _set_query_params(params: dict) -> None:
-    if hasattr(st, "experimental_set_query_params"):
-        st.experimental_set_query_params(**params)
-    elif hasattr(st, "set_query_params"):
-        st.set_query_params(**params)
-
-
-query_params = _get_query_params()
-page = query_params.get("page", ["process"])
-if isinstance(page, list):
-    page = page[0] if page else "process"
+page = st.query_params.get("page", "process")
 if page not in _VALID_PAGES:
     page = "process"
-
-current_query_page = query_params.get("page")
-if current_query_page != [page]:
-    _set_query_params({"page": page})
-
 
 def _nav_link(label: str, key: str) -> str:
     active = "gt2-nav-active" if page == key else ""
@@ -503,7 +481,6 @@ if page == "process":
                 dest = DOCKET_DIR / f.name
                 dest.write_bytes(f.read())
             st.success(f"✓  {len(docket_files)} docket file(s) staged.")
-            st.session_state["docket_uploader"] = None
 
         staged_dockets = list(DOCKET_DIR.glob("*.pdf"))
         if staged_dockets:
@@ -530,7 +507,6 @@ if page == "process":
                 dest = COMPLAINT_DIR / f.name
                 dest.write_bytes(f.read())
             st.success(f"✓  {len(complaint_files)} complaint file(s) staged.")
-            st.session_state["complaint_uploader"] = None
 
         staged_complaints = list(COMPLAINT_DIR.glob("*.pdf"))
         if staged_complaints:
@@ -881,8 +857,6 @@ elif page == "districts":
     if new_pdf:
         DISTRICT_PDF.write_bytes(new_pdf.read())
         st.success(f"✓ File updated: {new_pdf.name} ({new_pdf.size / 1024:.1f} KB)")
-        st.session_state["district_pdf_upload"] = None
-        st.experimental_set_query_params(page="districts")
         st.rerun()
 
     if DISTRICT_PDF.exists():
