@@ -481,6 +481,7 @@ if page == "process":
                 dest = DOCKET_DIR / f.name
                 dest.write_bytes(f.read())
             st.success(f"✓  {len(docket_files)} docket file(s) staged.")
+            st.session_state["docket_uploader"] = None
 
         staged_dockets = list(DOCKET_DIR.glob("*.pdf"))
         if staged_dockets:
@@ -507,6 +508,7 @@ if page == "process":
                 dest = COMPLAINT_DIR / f.name
                 dest.write_bytes(f.read())
             st.success(f"✓  {len(complaint_files)} complaint file(s) staged.")
+            st.session_state["complaint_uploader"] = None
 
         staged_complaints = list(COMPLAINT_DIR.glob("*.pdf"))
         if staged_complaints:
