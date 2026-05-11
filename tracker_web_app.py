@@ -32,11 +32,11 @@ META_FILE     = BASE_DIR / "output_meta.json"
 
 JUDGE_CSV          = BASE_DIR / "Federal Judicial Center Export.csv"
 GOALS_CSV          = BASE_DIR / "GoalsMapping.csv"
-GOALS_EXAMPLES     = BASE_DIR / "GoalsExamples.xlsx"
+GOALS_EXAMPLES     = BASE_DIR / "GoalsExamples.csv"
 ISSUES_CSV         = BASE_DIR / "IssuesMapping.csv"
 ISSUES_LIST_CSV    = BASE_DIR / "Issues.csv"
-ISSUES_EXAMPLES    = BASE_DIR / "LegalIssuesExamples.xlsx"
-ANALYSIS_EXAMPLES  = BASE_DIR / "AnalysisExamples.xlsx"
+ISSUES_EXAMPLES    = BASE_DIR / "LegalIssuesExamples.csv"
+ANALYSIS_EXAMPLES  = BASE_DIR / "AnalysisExamples.csv"
 DISTRICT_PDF       = BASE_DIR / "28 USC Ch5 District Courts.pdf"
 
 for d in [DOCKET_DIR, COMPLAINT_DIR, OUTPUT_DIR]:
@@ -407,22 +407,21 @@ def _render_file_section(
             else:
                 df = pd.read_csv(path, encoding="utf-8-sig")
 
+            ext = "xlsx" if is_xlsx else "csv"
+            mime = (
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                if is_xlsx else "text/csv"
+            )
             col_dl, _ = st.columns([1, 3])
             with col_dl:
-                with open(path, "rb") as fh:
-                    ext = "xlsx" if is_xlsx else "csv"
-                    mime = (
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                        if is_xlsx else "text/csv"
-                    )
-                    st.download_button(
-                        f"⬇ Download {ext.upper()}",
-                        data=fh,
-                        file_name=display_name,
-                        mime=mime,
-                        use_container_width=True,
-                        key=f"dl_{upload_key}",
-                    )
+                st.download_button(
+                    f"⬇ Download {ext.upper()}",
+                    data=path.read_bytes(),
+                    file_name=display_name,
+                    mime=mime,
+                    use_container_width=True,
+                    key=f"dl_{upload_key}",
+                )
 
             st.markdown(f"**{len(df):,} rows · {len(df.columns)} columns**")
 
@@ -729,10 +728,10 @@ elif page == "output":
                         del meta[f.name]
                         save_meta(meta)
                     st.session_state.pop(f"confirm_del_{f.name}", None)
-                    st.rerun()
+                    _rerun()
                 if c2.button("Cancel", key=f"no_del_{f.name}"):
                     st.session_state.pop(f"confirm_del_{f.name}", None)
-                    st.rerun()
+                    _rerun()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -916,10 +915,10 @@ elif page == "inputs":
     with tab_goals_ex:
         _render_file_section(
             path=GOALS_EXAMPLES,
-            display_name="GoalsExamples.xlsx",
-            upload_key="goals_xlsx_upload",
-            file_types=["xlsx"],
-            is_xlsx=True,
+            display_name="GoalsExamples.csv",
+            upload_key="goals_csv_examples_upload",
+            file_types=["csv"],
+            is_xlsx=False,
         )
 
     with tab_issues_list:
@@ -944,17 +943,17 @@ elif page == "inputs":
     with tab_issues_ex:
         _render_file_section(
             path=ISSUES_EXAMPLES,
-            display_name="LegalIssuesExamples.xlsx",
-            upload_key="issues_xlsx_upload",
-            file_types=["xlsx"],
-            is_xlsx=True,
+            display_name="LegalIssuesExamples.csv",
+            upload_key="issues_csv_examples_upload",
+            file_types=["csv"],
+            is_xlsx=False,
         )
 
     with tab_analysis_ex:
         _render_file_section(
             path=ANALYSIS_EXAMPLES,
-            display_name="AnalysisExamples.xlsx",
-            upload_key="analysis_xlsx_upload",
-            file_types=["xlsx"],
-            is_xlsx=True,
+            display_name="AnalysisExamples.csv",
+            upload_key="analysis_csv_examples_upload",
+            file_types=["csv"],
+            is_xlsx=False,
         )

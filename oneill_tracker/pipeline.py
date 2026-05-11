@@ -13,7 +13,7 @@ from typing import Any
 import fitz  # PyMuPDF
 import pymupdf4llm
 import titlecase
-from openpyxl import Workbook, load_workbook
+from openpyxl import Workbook
 
 try:
     from openai import OpenAI as _OpenAI
@@ -37,11 +37,11 @@ COMPLAINT_FOLDER_NAME = "TrialCourtComplaints"
 DISTRICT_COURT_CODE_FILE = "28 USC Ch5 District Courts.pdf"
 JUDGE_CSV_FILE = "Federal Judicial Center Export.csv"
 GOALS_MAPPING_CSV_FILE = "GoalsMapping.csv"
-GOALS_EXAMPLES_FILE = "GoalsExamples.xlsx"
+GOALS_EXAMPLES_FILE = "GoalsExamples.csv"
 ISSUES_CSV_FILE = "Issues.csv"
 ISSUES_MAPPING_CSV_FILE = "IssuesMapping.csv"
-LEGAL_ISSUES_EXAMPLES_FILE = "LegalIssuesExamples.xlsx"
-ANALYSIS_EXAMPLES_FILE = "AnalysisExamples.xlsx"
+LEGAL_ISSUES_EXAMPLES_FILE = "LegalIssuesExamples.csv"
+ANALYSIS_EXAMPLES_FILE = "AnalysisExamples.csv"
 US_STATES = [
         "ALABAMA", "ALASKA", "ARIZONA", "ARKANSAS", "CALIFORNIA",
         "COLORADO", "CONNECTICUT", "DELAWARE", "DISTRICT OF COLUMBIA", "FLORIDA", "GEORGIA",
@@ -263,17 +263,16 @@ def _call_llm(llm_client: Any, messages: list[dict], max_tokens: int, temperatur
     return None
 
 
-def _load_xlsx_rows(path: Path) -> list[tuple]:
-    """Load all data rows from an xlsx file, skipping the header row.
+def _load_csv_rows(path: Path) -> list[tuple]:
+    """Load all data rows from a CSV file, skipping the header row.
 
     Returns a list of row tuples, or an empty list if the file cannot be read.
     """
     try:
-        wb = load_workbook(path, read_only=True, data_only=True)
-        ws = wb.active
-        rows = list(ws.iter_rows(values_only=True))
-        wb.close()
-        return rows[1:]  # skip header
+        with path.open(newline="", encoding="utf-8-sig") as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+        return [tuple(row) for row in rows[1:]]  # skip header
     except Exception as e:
         print(f"Warning: could not load {path}: {e}", file=sys.stderr)
         return []
@@ -287,7 +286,7 @@ def _load_goals_examples(script_dir: Path) -> list[tuple[str, str]]:
     Rows with no Goal label are skipped.
     """
     results = []
-    for row in _load_xlsx_rows(script_dir / GOALS_EXAMPLES_FILE):
+    for row in _load_csv_rows(script_dir / GOALS_EXAMPLES_FILE):
         if len(row) < 3:
             continue
         request, goal = row[1], row[2]
@@ -382,7 +381,7 @@ def _load_legal_issues_examples(script_dir: Path) -> list[tuple[str, str]]:
     """Load labeled case→legal-issues pairs from LegalIssuesExamples.xlsx."""
     return [
         (str(row[0]).strip(), str(row[1]).strip())
-        for row in _load_xlsx_rows(script_dir / LEGAL_ISSUES_EXAMPLES_FILE)
+        for row in _load_csv_rows(script_dir / LEGAL_ISSUES_EXAMPLES_FILE)
         if len(row) >= 2 and row[0] and row[1]
     ]
 
@@ -405,7 +404,7 @@ def _build_llm_issues_context(examples: list[tuple[str, str]]) -> str:
 def _load_analysis_examples(script_dir: Path) -> list[tuple[str, str, str]]:
     """Load AnalysisExamples.xlsx and return (case_name, potential_impact, why_this_matters) tuples."""
     examples: list[tuple[str, str, str]] = []
-    for row in _load_xlsx_rows(script_dir / ANALYSIS_EXAMPLES_FILE):
+    for row in _load_csv_rows(script_dir / ANALYSIS_EXAMPLES_FILE):
         if not row or len(row) < 3:
             continue
         case   = str(row[0]).strip() if row[0] else ""
