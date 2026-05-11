@@ -341,9 +341,17 @@ hr { border-color: #e0ddd5; }
 
 # ── Page routing via query params ───────────────────────────────────────────────
 _VALID_PAGES = {"process", "output", "judicial", "districts", "inputs"}
-page = st.query_params.get("page", "process")
+query_params = st.experimental_get_query_params()
+page = query_params.get("page", ["process"])
+if isinstance(page, list):
+    page = page[0] if page else "process"
 if page not in _VALID_PAGES:
     page = "process"
+
+current_query_page = query_params.get("page")
+if current_query_page != [page]:
+    st.experimental_set_query_params(page=page)
+
 
 def _nav_link(label: str, key: str) -> str:
     active = "gt2-nav-active" if page == key else ""
@@ -859,6 +867,8 @@ elif page == "districts":
     if new_pdf:
         DISTRICT_PDF.write_bytes(new_pdf.read())
         st.success(f"✓ File updated: {new_pdf.name} ({new_pdf.size / 1024:.1f} KB)")
+        st.session_state["district_pdf_upload"] = None
+        st.experimental_set_query_params(page="districts")
         st.rerun()
 
     if DISTRICT_PDF.exists():
