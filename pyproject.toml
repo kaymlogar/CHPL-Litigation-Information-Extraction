@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "oneill-tracker"
+version = "0.1.0"
+description = "Automated analysis pipeline for healthcare litigation case tracking"
+requires-python = ">=3.11"
+dependencies = [
+    "streamlit",
+    "pandas",
+    "openpyxl",
+    "pymupdf",
+    "pymupdf4llm",
+    "openai",
+    "pypdf",
+    "titlecase",
+    "certifi",
+]
+
+# After `pip install .` (or `pip install -e .` for editable/dev install),
+# both the `oneill_tracker` package and the `summarize_cases` module are
+# importable from anywhere.
+[tool.setuptools]
+packages     = ["oneill_tracker"]
+py-modules   = ["summarize_cases"]
