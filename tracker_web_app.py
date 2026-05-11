@@ -341,9 +341,20 @@ hr { border-color: #e0ddd5; }
 
 # ── Page routing via query params ───────────────────────────────────────────────
 _VALID_PAGES = {"process", "output", "judicial", "districts", "inputs"}
-page = st.query_params.get("page", "process")
-if page not in _VALID_PAGES:
+
+_url_page = st.query_params.get("page", "")
+if _url_page in _VALID_PAGES:
+    page = _url_page
+    st.session_state["_page"] = page
+elif st.session_state.get("_page") in _VALID_PAGES:
+    page = st.session_state["_page"]
+else:
     page = "process"
+    st.session_state["_page"] = "process"
+
+def _rerun():
+    st.session_state["_page"] = page
+    st.rerun()
 
 def _nav_link(label: str, key: str) -> str:
     active = "gt2-nav-active" if page == key else ""
@@ -396,7 +407,7 @@ def _render_file_section(
             else:
                 df = pd.read_csv(path, encoding="utf-8-sig")
 
-            col_dl, col_spacer = st.columns([1, 3])
+            col_dl, _ = st.columns([1, 3])
             with col_dl:
                 with open(path, "rb") as fh:
                     ext = "xlsx" if is_xlsx else "csv"
@@ -450,7 +461,7 @@ def _render_file_section(
         path.write_bytes(uploaded.read())
         size_kb = uploaded.size / 1024
         st.success(f"✓ {display_name} updated ({size_kb:.1f} KB)")
-        st.rerun()
+        _rerun()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -490,7 +501,7 @@ if page == "process":
                     c1.write(f"📄 {p.name}")
                     if c2.button("✕", key=f"del_d_{p.name}", help="Remove"):
                         p.unlink()
-                        st.rerun()
+                        _rerun()
 
     # ── Complaint uploads ───────────────────────────────────────────────────────
     with col2:
@@ -516,7 +527,7 @@ if page == "process":
                     c1.write(f"📄 {p.name}")
                     if c2.button("✕", key=f"del_c_{p.name}", help="Remove"):
                         p.unlink()
-                        st.rerun()
+                        _rerun()
 
     st.markdown("---")
 
@@ -704,10 +715,10 @@ elif page == "output":
                             meta[new_path.name] = meta.pop(f.name)
                             save_meta(meta)
                         st.session_state.pop(f"renaming_{f.name}", None)
-                        st.rerun()
+                        _rerun()
                 if c2.button("Cancel", key=f"cancel_ren_{f.name}"):
                     st.session_state.pop(f"renaming_{f.name}", None)
-                    st.rerun()
+                    _rerun()
 
             if st.session_state.get(f"confirm_del_{f.name}"):
                 st.warning(f"Delete **{f.name}**? This cannot be undone.")
@@ -831,7 +842,7 @@ elif page == "districts":
         </div>
         """, unsafe_allow_html=True)
 
-        col_dl, col_spacer = st.columns([1, 3])
+        col_dl, _ = st.columns([1, 3])
         with col_dl:
             with open(DISTRICT_PDF, "rb") as fh:
                 st.download_button(
@@ -857,7 +868,7 @@ elif page == "districts":
     if new_pdf:
         DISTRICT_PDF.write_bytes(new_pdf.read())
         st.success(f"✓ File updated: {new_pdf.name} ({new_pdf.size / 1024:.1f} KB)")
-        st.rerun()
+        _rerun()
 
     if DISTRICT_PDF.exists():
         st.markdown("---")
