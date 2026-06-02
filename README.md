@@ -78,7 +78,7 @@ The CHPL team is currently working to integrate this output with their healthcar
 4. **Configure your API key**: To ensure effective connection with the OpenRouter API, the user should create a file at `.streamlit/secrets.toml` in the project folder with the following content:
 
    ```toml
-   OPENROUTER_API_KEY = "sk-or-your-key-here"
+   export OPENROUTER_API_KEY = "sk-or-your-key-here"
    ```
 
 5. **Download the latest federal judge data**: To optimize the accuracy of the check for the "President Who Appointed Judge" field for each case, the user should be begin by running the following code to make sure the Federal Judicial Center export is up-to-date:
