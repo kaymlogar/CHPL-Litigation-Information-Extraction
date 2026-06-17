@@ -118,7 +118,7 @@ This project, completed for the O'Neill Institute's Center for Health Policy and
 
 ### Running the code via web application
 
-A user may navigate to the following url to access the web application directly: 
+A user may navigate to the following url to access the web application directly: https://chpl-litigation-information-extraction.streamlit.app/
 
 This is the simplest path to test the application because it does not require configuring or preparing a Python virtual environment. However, one **major caveat** of using the web application is that files uploaded during a session will only be present for the duration of the current session. Thus, when a user accesses the application using this link, the Output Files page will only contain files generated during the current session, not during previous sessions, and updates to other files used as inputs to the model similarly will not permanently change these files on the backend. Thus if a user needs to make such long-term changes, they should first do so locally and then git commit and push to the github repo.
 
