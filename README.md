@@ -26,9 +26,6 @@ This project, completed for the O'Neill Institute's Center for Health Policy and
 | Potential Impact | Complaint; AI; AnalysisExamples.xlsx |
 | Why This Matters | Complaint; AI; AnalysisExamples.xlsx |
 
-
-The CHPL team is currently working to integrate this output with their healthcare litigation tracking application. They are in the midst of working with a software team to update the website, and I have been communicating with both teams about the potential to use this tool as a preliminary step, with quality review protections in place. Because I am employed as a research assistant with the CHPL team, and will continue to work with them this summer, I will continue to work on this project with them to ensure the smooth handoff of a polished product with thorough documentation so they may continue to use the product into the future. Plans for finishing the project include additional quality testing in even more scenarios (I have already done some but aspire to be as thorough as possible) and ensuring the output is consistent with all the team's data validation conventions and goals. As an aside, though I work with the team as a research assistant, please note that I did not log any hours or receive any pay for work completed on this project during the school semester because the project was primarily for this class.
-
 ## User Documentation
 
 ### Running the Code Locally
